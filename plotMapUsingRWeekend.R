@@ -7,9 +7,9 @@ load('site_info.Rda')
 load('realtime_record.Rda')
 load('pile_info.Rda')
 
-timerange <- c(as.Date("2016-04-01"), as.Date("2016-04-30"))
-fromDate <- seq.Date(timerange[1], timerange[2], by='1 day')
-endDate <- seq.Date(timerange[1] + 1, timerange[2] + 1, by='1 day')
+timerange <- c(as.POSIXct("2016-04-17 5:00:00"), as.POSIXct("2016-04-17 20:00:00"))
+fromTime <- seq.POSIXt(timerange[1], timerange[2], by='1 hour')
+endTime <- seq.POSIXt(timerange[1] + 3600, timerange[2] + 3600, by='1 hour')
 result <- data.frame(site_id= numeric(0), used_pile_ratio = numeric(0), longitude = numeric(0), latitude = numeric(0), radius = numeric(0))
 
 library(ggmap)
@@ -39,8 +39,7 @@ produceSourceImage <- function(k)
 		pileIndex <- 0
 		for(currentPile in pileCodes)
 		{
-			currentTimeRange <- c(fromDate[k], endDate[k])
-			currentTimeRange <- as.POSIXct(currentTimeRange, format = "%Y-%m-%d")
+			currentTimeRange <- c(fromTime[k], endTime[k])
 			timeFlag <- realtimeRecordBuffer$time > as.numeric(currentTimeRange)[1] & realtimeRecordBuffer$time < as.numeric(currentTimeRange)[2]
 			pileFlag <- realtimeRecordBuffer$pile_code == currentPile
 			currentFlag <- timeFlag & pileFlag
@@ -55,20 +54,19 @@ produceSourceImage <- function(k)
 	return(result)
 }
 
-dir.create("result", FALSE)
+dir.create("resultWeekend", FALSE)
 scary <- "#2b2b2b"
 light <- "#bfbfbf"
 
-#for (k in 1:length(fromDate))
-for (k in 1:1)
+for (k in 1:length(fromTime))
 {
 	result  <- produceSourceImage(k)
-	save(result, file = sprintf("./result/result_%d.Rda", k))
-	png(filename = sprintf("./result/Rplot%d.png", k), width=639.5*2, height=544*2, res=144, bg=scary)
+	save(result, file = sprintf("./resultWeekend/result_%d.Rda", k))
+	png(filename = sprintf("./resultWeekend/Rplot%d.png", k), width=639.5*2, height=544*2, res=144, bg=scary)
 
 	mapResult <- ggmap(baseMap) + theme_dark() + geom_point(aes(x = longitude, y = latitude, color = used_pile_ratio, shape = factor(radius,levels=c(0,1,2,3))),data = result, alpha = .5, size = 3) + 
 	scale_color_continuous(low="#00ff00", high="#ff0000", limit=c(0,1)) + 
-	labs(x = "Longitude", y ="Latitude", color = "Utilization", shape = "Capacity", title = fromDate[k])+ theme(plot.background=element_rect(fill=scary, color=scary),
+	labs(x = "Longitude", y ="Latitude", color = "Utilization", shape = "Capacity", title = paste(format(fromTime[k], "%H:%M"), format(endTime[k], "%H:%M"), sep = " ~ "))+ theme(plot.background=element_rect(fill=scary, color=scary),
           panel.background=element_rect(fill=scary, color=scary),
           legend.background=element_rect(fill=scary),
           legend.key=element_rect(fill=scary, color=scary),
