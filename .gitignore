@@ -1,0 +1,5 @@
+*.Rda
+result
+.DS_Store
+.Rapp.history
+.Rhistory
