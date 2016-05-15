@@ -1,6 +1,6 @@
 #library(RMySQL)
 #setwd('~/RProjects/plot')
-setwd('~/processElectricVehicleData')
+setwd('~/RProjects/processElectricVehicleData')
 #eChargingNet <- dbConnect(MySQL(), user='plot', password='plot', dbname='evehicle', host='114.214.198.18')
 #pile_info <- dbReadTable(eChargingNet, name='pile_info')
 load('site_info.Rda')
@@ -25,7 +25,8 @@ for(i in 1:length(site_info$site_id))
 	pileCount <- length(pileCodes)
 	pileCountVector <- c(pileCountVector, pileCount)
 }
-pileCountVector <- floor(pileCountVector / median(pileCountVector - 1, na.rm = FALSE))
+#pileCountVector <- floor(pileCountVector / median(pileCountVector - 1, na.rm = FALSE))
+siteUsedRatio <- sum(pileCountVector<=25) / length(pileCountVector)
 
 produceSourceImage <- function(k)
 {
@@ -66,16 +67,16 @@ for (k in 1:1)
 	save(result, file = sprintf("./result/result_%d.Rda", k))
 	png(filename = sprintf("./result/Rplot%d.png", k), width=639.5*2, height=544*2, res=144, bg=scary)
 
-	mapResult <- ggmap(baseMap) + theme_dark() + geom_point(aes(x = longitude, y = latitude, color = used_pile_ratio, shape = factor(radius,levels=c(0,1,2,3))),data = result, alpha = .5, size = 3) + 
-	scale_color_continuous(low="#00ff00", high="#ff0000", limit=c(0,1)) + 
-	labs(x = "Longitude", y ="Latitude", color = "Utilization", shape = "Capacity", title = fromDate[k])+ theme(plot.background=element_rect(fill=scary, color=scary),
+	mapResult <- ggmap(baseMap) + theme_dark() + geom_point(aes(x = longitude, y = latitude, color = used_pile_ratio, size = radius),data = result, alpha = .5) + 
+	scale_color_continuous(low="#00ff00", high="#ff0000", limit=c(0,1)) + scale_radius(name="Capacity", range = c(2,6), limits = c(0,25), breaks = c(3,8,18,25), labels = c("0-2", "3-7", "8-17", "19-25")) +
+	labs(x = paste("UsedSiteCount / TotalSiteCount = ", sprintf("%1.2f%%", 100 * siteUsedRatio), sep = ""), color = "Utilization", title = fromDate[k]) + theme(plot.background=element_rect(fill=scary, color=scary),
           panel.background=element_rect(fill=scary, color=scary),
           legend.background=element_rect(fill=scary),
           legend.key=element_rect(fill=scary, color=scary),
           legend.text=element_text(color=light, size=10),
           legend.title=element_text(color=light),
           axis.title=element_text(color=light),
-          axis.title.x=element_blank(),
+          axis.title.x=element_text(color=light, size=12),
           axis.title.y=element_blank(),
           plot.title=element_text(color=light, face="bold", size=16),
           plot.margin=margin(0, 0, 0, 0))
