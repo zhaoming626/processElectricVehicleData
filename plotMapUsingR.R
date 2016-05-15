@@ -68,7 +68,7 @@ for (k in 1:1)
 	png(filename = sprintf("./result/Rplot%d.png", k), width=639.5*2, height=544*2, res=144, bg=scary)
 
 	mapResult <- ggmap(baseMap) + theme_dark() + geom_point(aes(x = longitude, y = latitude, color = used_pile_ratio, size = radius),data = result, alpha = .5) + 
-	scale_color_continuous(low="#00ff00", high="#ff0000", limit=c(0,1)) + scale_radius(name="Capacity", range = c(2,6), limits = c(0,25), breaks = c(3,8,18,25), labels = c("0-2", "3-7", "8-17", "19-25")) +
+	scale_color_continuous(low="#00ff00", high="#ff0000", limit=c(0,1)) + scale_radius(name="Capacity", range = c(2,6), limits = c(0,117), breaks = c(8,18,26,117), labels = c("0-7", "9-17", "19-25", "25-117")) +
 	labs(x = paste("UsedSiteCount / TotalSiteCount = ", sprintf("%1.2f%%", 100 * siteUsedRatio), sep = ""), color = "Utilization", title = fromDate[k]) + theme(plot.background=element_rect(fill=scary, color=scary),
           panel.background=element_rect(fill=scary, color=scary),
           legend.background=element_rect(fill=scary),
